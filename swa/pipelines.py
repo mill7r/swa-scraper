@@ -13,8 +13,8 @@ class CheckDuplicatesPipeline(object):
 	def __init__(self):
 		self.seen = set()
 
-    def process_item(self, item, spider):
-		if ( isinstance(item, fare) and item['flight'] in self.seen):
+	def process_item(self, item, spider):
+		if ( isinstance(item, Fare) and item['flight'] in self.seen):
 			raise DropItem("Duplicate caught.")	
 		else:
 			self.seen.add(item['flight'])

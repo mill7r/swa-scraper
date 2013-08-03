@@ -14,3 +14,7 @@ NEWSPIDER_MODULE = 'swa.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # Chrome 28
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'
+
+ITEM_PIPELINES = [
+	'swa.pipelines.CheckDuplicatesPipeline'
+]

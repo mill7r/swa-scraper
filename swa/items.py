@@ -15,8 +15,5 @@ class Fare(Item):
 	price = Field()
 	stops = Field()
 	connectingArpts = Field()
-
-class Route(Item):
-	fareList = Field()
-
+	fareValidityDate = Field() 
 	
