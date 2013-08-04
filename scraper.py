@@ -1,18 +1,46 @@
 from swa import *
-from swa.spiders import *
-from swa.settings import *
+from swa.spiders.swa_spider import *
+import swa.settings
 
 from twisted.internet import reactor
 from scrapy.crawler import Crawler
 from scrapy.settings import Settings
-from scrapy.shell import Shell
-from scrapy import log
+from scrapy import log, signals
 
+class SWACrawlerScript(object):
+	def __init__(self, origin, destination, date, debug=False, defaultSettings=True):
+		self.debug = debug
+		
+		self.origin = origin
+		self.destination = destination
+		self.date = date
+		
+		# initialize spider
+		self.spider = SWAFareSpider(self.origin, self.date, self.destination)
+		
+		# initialize settings
+		settingValues = self.loadSettings() if defaultSettings else dict()
+		self.settings = Settings(values=settingValues)
 
-swa = SWAFareSpider("AUS", "August 14th 2013", "PIT")
-crawler = Crawler(Settings())
-crawler.configure()
-crawler.crawl(swa)
-crawler.start()
-log.start(loglevel=log.DEBUG)
-reactor.run()
+		# initialize crawler
+		self.crawler = Crawler(self.settings)
+		self.crawler.configure()
+		
+		print "Set up"
+	def loadSettings(self):	
+		settingsList = [i for i in dir(swa.settings) if i[0] != "_"]
+		settingsDict = {}
+		for s in settingsList:
+			# yikes
+			settingsDict[s] = eval("swa.settings.%s" % s)
+		return settingsDict
+	
+	def run(self):
+		print "Running"
+		self.crawler.crawl(self.spider)
+		self.crawler.start()
+		if ( self.debug ): log.start(loglevel=log.DEBUG)
+		reactor.run()
+
+if __name__ == '__main__':
+	SWACrawlerScript(origin="AUS", destination="PIT", date="August 14th, 2013", debug=True).run()
