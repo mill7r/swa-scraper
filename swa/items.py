@@ -12,6 +12,7 @@ class Fare(Item):
 	flight = Field()
 	arrive = Field()
 	depart = Field()
+	faretype = Field()
 	price = Field()
 	stops = Field()
 	connectingArpts = Field()

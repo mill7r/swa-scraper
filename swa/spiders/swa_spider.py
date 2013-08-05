@@ -117,23 +117,35 @@ class SWAFareSpider(BaseSpider):
 			return
 
 		# Conveniently packaged flight info in string form for form submission
-		xpath = '//div[@class="productPricing"]/div/input/@title'
-		flightList = html.select(xpath).extract()
+		xpath = '//div[@class="productPricing"]//input/@title'
+		selectors = [ 
+			'//table[@id="faresOutbound"]//td[@class="price_column "]' + xpath,   # business select
+			'//table[@id="faresOutbound"]//td[@class="price_column"][1]' + xpath, # anytime
+			'//table[@id="faresOutbound"]//td[@class="price_column"][2]' + xpath  # wanna get away
+			]
+		fareList = []
+		for selector in selectors:
+			fareList.append( html.select(selector).extract() )
 
 		# Process that info and load into a Fare() item.
-		for flightString in flightList:
-			if ( flightString[0] == 'D' ):
-				flightData = Util.parseFlight(flightString, self.outDate.date())
-				self.log("Found: %s" % flightString)
-				flight = Fare()		
-				
-				for	key in flightData:
-					flight[key] = flightData[key]
-				flight['origin'] = self.origin
-				flight['destination'] = self.destination
-				flight['date'] = self.outDate
-				
-				self.log('Added')
-				yield flight
-			else:
-				continue
+		i = 0
+		fareType = ["Business Select", "Anytime", "Wanna Get Away"]
+		for fare in fareList:
+			self.log("Faretype: %d %s" % (i, fareType[i]) )
+			for flightString in fare:
+				if ( flightString[0] == 'D' ):
+					flightData = Util.parseFlight(flightString, self.outDate.date())
+					self.log("Found: %s" % flightString)
+					flight = Fare()		
+			
+					for	key in flightData:
+						flight[key] = flightData[key]
+					flight['origin'] = self.origin
+					flight['destination'] = self.destination
+					flight['date'] = self.outDate
+					flight['faretype'] = fareType[i]
+					self.log('Added')
+					yield flight
+				else:
+					continue
+			i += 1		
